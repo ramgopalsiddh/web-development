@@ -7,12 +7,13 @@ async function init(){
     let currentGuess = '';
     let currentRow = 0;
     let isLoading = true;
+    let done = false;
 
-    const res = await fetch("https://words.dev-apis.com/word-of-the-day");
+    const res = await fetch("https://words.dev-apis.com/word-of-the-day?random=1");
+    // rendom=1 is use for genrate random word
     const resObj = await res.json();
     const word = resObj.word.toUpperCase();
     const wordParts = word.split("");
-    let done = false;
     setLoading(false);
     isLoading = false;
 
@@ -35,7 +36,6 @@ async function init(){
             return;
         }
 
-
         isLoading = true;
         setLoading(true);
         const res = await fetch("https://words.dev-apis.com/validate-word" , {
@@ -55,9 +55,9 @@ async function init(){
             return;
         }
 
-
         const guessParts = currentGuess.split("");
         const map = makeMap(wordParts);
+        let allRight = true;
         console.log(map);
 
         for(let i = 0; i < ANSWER_LENGTH; i++) {
@@ -72,17 +72,20 @@ async function init(){
             if (guessParts[i] === wordParts[i]) {
                 // do nothing we already did it
             } else if (wordParts.includes(guessParts[i]) && map[guessParts[i]] > 0){
+                allRight = false;
                 // mark as close 
                 letters[currentRow * ANSWER_LENGTH + i].classList.add("close");
             } else {
+                allRight = false;
                 letters[currentRow * ANSWER_LENGTH + i].classList.add("wrong");
             }
         }
 
         currentRow++;
-        if (currentGuess === word) {
+        if (allRight) {
             // alert for win condition 
             alert('you win!');
+            document.querySelector('.brand').classList.add("winner");
             done = true;
             return;
         } else if(currentRow === ROUNDS) {
